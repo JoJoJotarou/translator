@@ -1,0 +1,79 @@
+{
+  "name": "translator",
+  "displayName": "Translator",
+  "description": "A friendly translator",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.87.2"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "translator.helloWorld",
+        "title": "Hello World"
+      }
+    ],
+    "configuration": {
+      "title": "Translator",
+      "properties": {
+        "translator.engine": {
+          "type": "string",
+          "default": "volc",
+          "enum": [
+            "microsoft",
+            "volc"
+          ],
+          "markdownEnumDescriptions": [
+            "[microsoft translation](https://translate.volcengine.com)",
+            "[volc translation](https://translate.volcengine.com)"
+          ],
+          "description": "Choose your favorite translation engine"
+        },
+        "translator.targetLanguage": {
+          "type": "string",
+          "default": "zh",
+          "description": "target language"
+        },
+        "translator.volc.accessKey": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "volc translation access key id. See the [API Access Documentation](https://www.volcengine.com/docs/4640/130872)"
+        },
+        "translator.volc.secretKey": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "volc translation secret access key. See the [API Access Documentation](https://www.volcengine.com/docs/4640/130872)"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.6",
+    "@types/node": "18.x",
+    "@types/vscode": "^1.88.0",
+    "@typescript-eslint/eslint-plugin": "^7.4.0",
+    "@typescript-eslint/parser": "^7.4.0",
+    "@vscode/test-cli": "^0.0.8",
+    "@vscode/test-electron": "^2.3.9",
+    "eslint": "^8.57.0",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "axios": "^1.6.8"
+  }
+}
