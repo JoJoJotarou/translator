@@ -36,18 +36,36 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(disposable);
 
-	context.subscriptions.push(vscode.window.onDidChangeTextEditorSelection((event: vscode.TextEditorSelectionChangeEvent) => {
-		const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
-		if (editor) {
-			// 获取所选文本
-			const selectedText = editor.document.getText(editor.selection);
-			console.log('Selected text:', selectedText);
+	// context.subscriptions.push(vscode.window.onDidChangeTextEditorSelection((event: vscode.TextEditorSelectionChangeEvent) => {
+	// 	const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+	// 	if (editor) {
+	// 		// 获取所选文本
+	// 		const selectedText = editor.document.getText(editor.selection);
+	// 		console.log('Selected text:', selectedText);
+	// 	}
+	// }));
+
+	vscode.languages.registerHoverProvider("typescript", {
+		// provideHover(document, position) {
+		// 	const word = document.getText(
+		// 		document.getWordRangeAtPosition(position, /\b\w+(?=\(.*\))/)
+		// 	);
+		// 	if (builtin_funcs[word] != undefined) {
+		// 		return new vscode.Hover(
+		// 			new vscode.MarkdownString(`${builtin_funcs[word]}`)
+		// 		);
+		// 	} else {
+		// 		return null;
+		// 	}
+		// },
+		provideHover(document, position, token) {
+			console.log('post', position);
+			console.log('Hovering over: ', document.getText(document.getWordRangeAtPosition(position)));
+			return {
+				contents: ['Hover Content', 'More Content']
+			};
 		}
-	}));
-
-	// 记得在适当的时候取消事件监听器
-	// disposable.dispose();
-
+	});
 
 	// Listening to configuration changes
 	context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(e => {
