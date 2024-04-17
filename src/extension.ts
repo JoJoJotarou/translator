@@ -30,6 +30,81 @@ export function activate(context: vscode.ExtensionContext) {
 		// vscode.window.showInformationMessage('Hello World from Translator!');
 	});
 
+	let isAdd = true;
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('translator.translateAndHover', async () => {
+			// The code you place here will be executed every time your command is executed
+			// Display a message box to the user
+
+			const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+			if (!editor) {
+				return;
+			}
+
+
+			const selectedText = editor.document.getText(editor.selection);
+			if (selectedText.length > 0) {
+				vscode.window.showInformationMessage(selectedText);
+				return;
+			}
+			// 获取所在文本
+			const positionText = editor.document.getText(
+				editor.document.getWordRangeAtPosition(editor.selection.active)
+			);
+			// vscode.window.showInformationMessage(positionText);
+			// return printDefinitionsForActiveEditor();
+
+			// vscode.commands.executeCommand("vscode.executeHoverProvider"
+			// )
+
+			await vscode.commands.executeCommand<vscode.Hover>(
+				'vscode.executeHoverProvider',
+				editor.document.uri,
+				editor.selection.active
+			).then((hovers: vscode.Hover) => {
+				console.log(hovers);
+				// if (hovers && hovers.length > 0) {
+				// 	// 处理获取到的悬停信息
+				// 	const hoverText = hovers.map(hover => hover.contents.value).join('\n\n');
+
+				// 	// 显示悬停信息，或者根据需要进行其他操作
+				// 	console.log(hoverText);
+				// } else {
+				// 	// 如果没有悬停信息，可以执行其他逻辑
+				// 	console.log('No hover information available at this position.');
+				// }
+			});
+			// vscode.commands.executeCommand("editor.action.showHover");
+
+			if (isAdd) {
+				vscode.languages.registerHoverProvider(
+					'typescript',
+					new (class implements vscode.HoverProvider {
+						provideHover(
+							_document: vscode.TextDocument,
+							_position: vscode.Position,
+							_token: vscode.CancellationToken
+						): vscode.ProviderResult<vscode.Hover> {
+							const commentCommandUri = vscode.Uri.parse(`command:editor.action.addCommentLine`);
+							const contents = new vscode.MarkdownString(`[Add comment](${commentCommandUri})`);
+
+							// To enable command URIs in Markdown content, you must set the `isTrusted` flag.
+							// When creating trusted Markdown string, make sure to properly sanitize all the
+							// input content so that only expected command URIs can be executed
+							contents.isTrusted = true;
+
+							return new vscode.Hover(contents);
+						}
+					})()
+				);
+				isAdd = false;
+			}
+			vscode.commands.executeCommand("editor.action.showDefinitionPreviewHover");
+			// vscode.window.showInformationMessage('Hello World from Translator!');
+		})
+	);
+
 	console.log(
 		JSON.stringify(configuration)
 	);
@@ -45,27 +120,67 @@ export function activate(context: vscode.ExtensionContext) {
 	// 	}
 	// }));
 
-	vscode.languages.registerHoverProvider("typescript", {
-		// provideHover(document, position) {
-		// 	const word = document.getText(
-		// 		document.getWordRangeAtPosition(position, /\b\w+(?=\(.*\))/)
-		// 	);
-		// 	if (builtin_funcs[word] != undefined) {
-		// 		return new vscode.Hover(
-		// 			new vscode.MarkdownString(`${builtin_funcs[word]}`)
-		// 		);
-		// 	} else {
-		// 		return null;
-		// 	}
-		// },
-		provideHover(document, position, token) {
-			console.log('post', position);
-			console.log('Hovering over: ', document.getText(document.getWordRangeAtPosition(position)));
-			return {
-				contents: ['Hover Content', 'More Content']
-			};
+	// vscode.languages.registerHoverProvider("typescript", {
+	// 	// provideHover(document, position) {
+	// 	// 	const word = document.getText(
+	// 	// 		document.getWordRangeAtPosition(position, /\b\w+(?=\(.*\))/)
+	// 	// 	);
+	// 	// 	if (builtin_funcs[word] != undefined) {
+	// 	// 		return new vscode.Hover(
+	// 	// 			new vscode.MarkdownString(`${builtin_funcs[word]}`)
+	// 	// 		);
+	// 	// 	} else {
+	// 	// 		return null;
+	// 	// 	}
+	// 	// },
+	// 	provideHover(document, position, token) {
+	// 		console.log('post', position);
+	// 		console.log('Hovering over: ', document.getText(document.getWordRangeAtPosition(position)));
+	// 		return {
+	// 			contents: ['Hover Content', 'More Content']
+	// 		};
+	// 	}
+	// });
+
+	async function printDefinitionsForActiveEditor() {
+		const activeEditor = vscode.window.activeTextEditor;
+		if (!activeEditor) {
+			return;
 		}
-	});
+
+		const definitions = await vscode.commands.executeCommand<vscode.Location[]>(
+			'editor.action.showHover',
+			activeEditor.document.uri,
+			activeEditor.selection.active
+		);
+		for (const definition of definitions) {
+			console.log(definition);
+		}
+
+		return new vscode.Hover("123");
+	}
+
+	// hover 增加可执行命令
+	// vscode.languages.registerHoverProvider(
+	// 	'typescript',
+	// 	new (class implements vscode.HoverProvider {
+	// 		provideHover(
+	// 			_document: vscode.TextDocument,
+	// 			_position: vscode.Position,
+	// 			_token: vscode.CancellationToken
+	// 		): vscode.ProviderResult<vscode.Hover> {
+	// 			const commentCommandUri = vscode.Uri.parse(`command:editor.action.addCommentLine`);
+	// 			const contents = new vscode.MarkdownString(`[Add comment](${commentCommandUri})`);
+
+	// 			// To enable command URIs in Markdown content, you must set the `isTrusted` flag.
+	// 			// When creating trusted Markdown string, make sure to properly sanitize all the
+	// 			// input content so that only expected command URIs can be executed
+	// 			contents.isTrusted = true;
+
+	// 			return new vscode.Hover(contents);
+	// 		}
+	// 	})()
+	// );
 
 	// Listening to configuration changes
 	context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(e => {

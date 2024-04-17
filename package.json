@@ -18,6 +18,19 @@
       {
         "command": "translator.helloWorld",
         "title": "Hello World"
+      },
+      {
+        "command": "translator.translateAndHover",
+        "title": "Translate and show on hover",
+        "category": "Translator",
+        "icon": "$(book)"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "translator.translateAndHover",
+        "key": "ctrl+;",
+        "mac": "cmd"
       }
     ],
     "configuration": {
